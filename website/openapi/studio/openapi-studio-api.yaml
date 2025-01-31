@@ -1,0 +1,683 @@
+openapi: 3.0.0
+x-tagGroups:
+  - name: OIDC4VC
+    tags:
+      - Issuance
+      - Verification
+  - name: Entities Managment
+    tags:
+      - Credential Schemas
+      - Credential Types
+      - Entities
+paths:
+  /vidcredentials-studio/api/v1/credential-types:
+    get:
+      tags:
+        - Credential Types
+      operationId: CredentialTypeControllerIntegrators_getCredentialTypes
+      summary: Get Credential Types
+      description: >-
+        This endpoint retrieves a list of available credential types supported
+        by VIDcredentials Studio. The response includes details for each
+        credential type, such as a unique identifier (ID) and the type's name.
+        Integrators can use this information to understand the available
+        credential types for further interactions.
+      security:
+        - bearerAuth: []
+      parameters: []
+      responses:
+        '200':
+          description: Array list of Credential Types
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CredentialTypeDto'
+
+  /vidcredentials-studio/api/v1/credential-types/{credentialTypeId}:
+    get:
+      tags:
+        - Credential Types
+      operationId: CredentialTypeControllerIntegrators_getCredentialTypeById
+      summary: Get Specific Credential Type
+      description: >-
+        This endpoint retrieves information about a specific credential type
+        based on the provided credential type ID.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: credentialTypeId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Information of the Specific Credential Type
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CredentialTypeDto'
+  /vidcredentials-studio/api/v1/entity-data:
+    get:
+      tags:
+        - Entities
+      operationId: EntityIntegratorsController_getEntityData
+      summary: Get Entity Data
+      description: >-
+        This endpoint allows integrators to get the information of the entity
+        with which the integrator has been authorized.
+      security:
+        - bearerAuth: []
+      parameters: [ ]
+      responses:
+        '200':
+          description: Entity information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityDataDto'
+  /vidcredentials-studio/api/v1/credential-status/{issuanceId}:
+    get:
+      operationId: CredentialStatusIntegratorsController_getCredentialStatus
+      summary: Get Credential Status
+      description: >-
+        This endpoint allows integrators to retrieve the status of a credential
+        within VIDcredentials Studio. It requires the issuance ID of the
+        credential to get the status of.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: issuanceId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The status of the credential
+      tags:
+        - VIDCredentials Studio
+  /vidcredentials-studio/api/v1/credential-orders:
+    post:
+      operationId: CredentialOrderIntegratorsController_createCredential
+      summary: Create Credential Order
+      description: >-
+        Integrators can utilize this endpoint to create a credential order,
+        specifying issuance ID, credential type ID, recipient's email, payload,
+        identity verification details, and language preference. This endpoint
+        facilitates the streamlined initiation of credential creation processes
+        within VIDcredentials Studio.
+      security:
+        - bearerAuth: []
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCredentialOrderIntegratorsDto'
+      responses:
+        '201':
+          description: Credential Order Created Successfully
+      tags:
+        - VIDCredentials Studio
+  /vidcredentials-studio/api/v1/credential-requests:
+    post:
+      operationId: CredentialRequestIntegratorsController_createCredentialRequest
+      summary: Create Credential Request
+      description: >-
+        Integrators can use this endpoint to initiate a credential request. The
+        request includes issuance ID, credential type ID, payload, recipient's
+        email, callback URL, language preference, and details for identity
+        verification, such as type and requested information.
+      security:
+        - bearerAuth: []
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCredentialRequestIntegratorsDto'
+      responses:
+        '201':
+          description: Credential Request created successfully
+      tags:
+        - VIDCredentials Studio
+  /vidcredentials-studio/api/v1/credentials:
+    post:
+      operationId: CredentialIntegratorsController_createCredential
+      summary: Issue Credential
+      description: >-
+        This endpoint allows integrators to create credentials within
+        VIDcredentials Studio. It requires details such as issuance ID, entity
+        decentralized identifier (DID), credential type ID, recipient DID, and
+        payload. Optionally, integrators can include self-attested parameters
+        and set an expiration date for the credential.
+      security:
+        - bearerAuth: []
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IssueCredentialDto'
+      responses:
+        '201':
+          description: Credential Issued Successfully
+      tags:
+        - VIDCredentials Studio
+  /vidcredentials-studio/api/v1/credential-offer-authorize:
+    post:
+      operationId: CredentialOfferAuthorizeIntegratorsController_credentialOffer
+      summary: Issue Credential with OIDC4CI with Authorization Flow
+      description: >-
+        Integrators can use this endpoint to request a Credential Issuance using
+        OIDC Authorization In Time flow.
+      security:
+        - bearerAuth: []
+      parameters: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CredentialOfferAuthorizeRequestDto'
+      responses:
+        '201':
+          description: The response provides two different values and the integrator can consume whichever is useful in integrator's flow.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CredentialOfferAuthorizeResponseDto'
+      tags:
+        - VIDCredentials Studio
+  /vidcredentials-studio/api/v1/credential-offer-pre-auth:
+    post:
+      operationId: CredentialOfferPreAuthIntegratorsController_credentialOffer
+      summary: Issue Credential with OIDC4CI with Pre-Authorization Flow
+      description: >-
+        Integrators can use this endpoint to request a Credential Issuance using
+        OIDC Pre-Authorized In Time flow.
+      security:
+        - bearerAuth: []
+      parameters: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CredentialOfferPreAuthRequestDto'
+      responses:
+        '201':
+          description: The response provides two different values and the integrator can consume whichever is useful in integrator's flow.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CredentialOfferPreAuthResponseDto'
+      tags:
+        - Issuance
+  /vidcredentials-studio/api/v1/oidc4vp/vp-request:
+    post:
+      operationId: Openid4vpIntegratorsController_openid4vp
+      summary: Request a Verifiable Presentation with OIDC4VP
+      description: >-
+        Integrators can use this endpoint to request a Verifiable Presentation
+        using OIDC4VP. The request includes the scope of the request, an
+        identifier for the request, and a callback URL where the credentials
+        presented by the user will be sent if the presentation is successful.
+      security:
+        - bearerAuth: []
+      parameters: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Openid4vpRequestDto'
+      responses:
+        '201':
+          description: The response provides two different values and the integrator can consume whichever is useful in integrator's flow.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Openid4vpResponseDto'
+      tags:
+        - Verification
+  /vidcredentials-studio/api/v1/revocation/{issuanceId}:
+    put:
+      operationId: RevokeCredentialIntegratorsController_revokeCredential
+      summary: Revoke Credential
+      description: >-
+        This endpoint allows integrators to revoke credentials within
+        VIDcredentials Studio. It requires the issuance ID of the credential to
+        revoke.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: issuanceId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Credential revoked
+      tags:
+        - VIDCredentials Studio
+info:
+  title: VIDcredentialsStudio
+  description: VIDcredentialsStudio API documentation
+  version: '1.0'
+  contact: {}
+tags: []
+servers: []
+components:
+  securitySchemes:
+    bearerAuth:
+      scheme: bearer
+      bearerFormat: JWT
+      type: http
+  schemas:
+    UserData:
+      type: object
+      properties:
+        userName:
+          type: string
+          example: Alice
+          description: Full name of the user receiving the credential
+        userLegalId:
+          type: string
+          example: 12345678D
+          description: Legal ID of the user receiving the credential
+      required:
+        - userName
+        - userLegalId
+    RequestedInfo:
+      type: object
+      properties:
+        path:
+          type: string
+          example: email
+          description: >-
+            Location of the attribute in the Credential Subject of the
+            Verifiable Credential to be checked.
+        value:
+          type: string
+          example: test@test.com
+          description: Value of the expected attributes.
+      required:
+        - path
+        - value
+    IdentityVerificationMethod:
+      type: object
+      properties:
+        type:
+          type: string
+          example: EmailCredential
+          description: >-
+            Type of user verification method requested. Can be F2F or
+            EmailCredential
+        userData:
+          description: >-
+            If verification Method type is F2F, the UserData must be filed with
+            legal user data.
+          allOf:
+            - $ref: '#/components/schemas/UserData'
+        requestedInfo:
+          description: >-
+            If verification Method type is EmailCredential, the RequestedInfo
+            must be filed with the Verifiable Credential expected attributes.
+          type: array
+          items:
+            $ref: '#/components/schemas/RequestedInfo'
+      required:
+        - type
+    CreateCredentialOrderIntegratorsDto:
+      type: object
+      properties:
+        issuanceId:
+          type: string
+          example: 72587765-b999-43ce-bdc2-80ac26619d84
+          description: >-
+            ID of credential issuing process. Can be random in order to not
+            coincide with other issuing processes.
+        credentialTypeId:
+          type: string
+          example: 44c991b0-b30e-4537-a34c-c96de30193a3
+          description: Credential type ID
+        email:
+          type: string
+          example: test@gmail.com
+          description: The email of the recipient of the credential
+        payload:
+          type: object
+          example:
+            email: test@test.com
+          description: The content of the credentialSubject. This payload must comply with the same data structure of the credentialType of the credential that is being issued. Note that if there's an id field in the credentialSubject, this id has to be the did of the subject of the credential, following the W3C standard.
+        language:
+          type: string
+          example: en
+          description: >-
+            The language in which the user will receive the email to accept and
+            receive the credential
+        entityDid:
+          type: string
+          example: >-
+            did:ethr:0x03fdd57adec3d438ea237fe46b33ee1e016eda6b585c3e27ea66686c2ea5358479
+          description: The did of the entity issuing the credential
+        identityVerificationMethod:
+          $ref: '#/components/schemas/IdentityVerificationMethod'
+      required:
+        - issuanceId
+        - credentialTypeId
+        - email
+        - payload
+        - language
+        - identityVerificationMethod
+    CredentialTypeDto:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 73d72395-dfb1-4184-9b0a-d6614e03cb91
+          description: The id of the credential type
+        type:
+          example: '[''VerifiableCredential'', ''EmailCredential'']'
+          description: Types of the credential
+          type: array
+          items:
+            type: string
+        format:
+          type: string
+          example: json or jwt
+          description: Format of the credential
+        entityId:
+          type: string
+          description: Unique identifier for the entity associated with the credential type
+          example: 25d428db-ef37-471d-9dfe-92f7e4aa9702
+        template:
+          description: Template for the credential
+          example:
+            - name: email
+              fieldType: email
+          type: array
+          items:
+            type: object
+        expiration:
+          type: object
+          description: Expiration details for the credential
+          example:
+            expires: false
+        metadata:
+          type: object
+          description: Metadata information for the credential rendering
+          example:
+            color: '#FD6842'
+            logo: >-
+              data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC4CAYAAABKD8ZJAAAACXBIWXMAABYlAAAWJQFJ...nC2WUsFKNLDQS5ukIrovI/OuK87xs8RFzrSei6vzP/Z
+            header:
+              firstLine: EmailCredential
+              secondLine: email
+            fontColor: '#ffffff'
+      required:
+        - id
+        - type
+        - format
+        - entityId
+        - template
+        - expiration
+    IssueCredentialDto:
+      type: object
+      properties:
+        issuanceId:
+          type: string
+          example: 72587765-b999-43ce-bdc2-80ac26619d84
+          description: >-
+            ID of credential issuing process. Can be random in order to not
+            coincide with other issuing processes.
+        entityDid:
+          type: string
+          example: >-
+            did:ethr:0x03fdd57adec3d438ea237fe46b33ee1e016eda6b585c3e27ea66686c2ea5358479
+          description: The did of the entity issuing the credential
+        credentialTypeId:
+          type: string
+          example: 44c991b0-b30e-4537-a34c-c96de30193a3
+          description: ID of the credential type
+        recipientDid:
+          type: string
+          example: did:ethr:0x613b55c21F0e7ff2994404A3f32d5234Fb2C6216
+          description: The did of the recipient of the credential
+        payload:
+          type: object
+          example:
+            email: test@test.com
+          description: The content of the credentialSubject. This payload must comply with the same data structure of the credentialType of the credential that is being issued. Note that if there's an id field in the credentialSubject, this id has to be the did of the subject of the credential, following the W3C standard.
+        selfAttestedParams:
+          type: string
+          description: Proof of user identification
+        expirationDate:
+          type: number
+          example: 1
+          description: The credential's expiration date specified in number of days
+      required:
+        - issuanceId
+        - credentialTypeId
+        - recipientDid
+        - payload
+    CreateCredentialRequestIntegratorsDto:
+      type: object
+      properties:
+        issuanceId:
+          type: string
+          example: 72587765-b999-43ce-bdc2-80ac26619d84
+          description: >-
+            ID of credential issuing process. Can be random in order to not
+            coincide with other issuing processes.
+        credentialTypeId:
+          type: string
+          example: 44c991b0-b30e-4537-a34c-c96de30193a3
+          description: Credential type ID
+        payload:
+          type: object
+          example:
+            email: test@test.com
+          description: The content of the credentialSubject. This payload must comply with the same data structure of the credentialType of the credential that is being issued. Note that if there's an id field in the credentialSubject, this id has to be the did of the subject of the credential, following the W3C standard.
+        email:
+          type: string
+          example: test@gmail.com
+          description: The email of the recipient of the credential
+        callbackUrl:
+          type: string
+          description: >-
+            URL where the credential request creation data will be sent (Not
+            implemented)
+        language:
+          type: string
+          example: en
+          description: >-
+            The language in which the user will receive the email to accept and
+            receive the credential
+        entityDid:
+          type: string
+          example: >-
+            did:ethr:0x03fdd57adec3d438ea237fe46b33ee1e016eda6b585c3e27ea66686c2ea5358479
+          description: The did of the entity issuing the credential
+        identityVerificationMethod:
+          $ref: '#/components/schemas/IdentityVerificationMethod'
+      required:
+        - issuanceId
+        - credentialTypeId
+        - payload
+        - email
+        - callbackUrl
+        - language
+        - identityVerificationMethod
+    EntityDataDto:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 73d72395-dfb1-4184-9b0a-d6614e03cb91
+          description: The id of the entity
+        name:
+          type: string
+          example: Validated ID
+          description: The entity name
+        dids:
+          example: '[''did:ethr:0x123''],[did:ethr:0x456]'
+          description: The list of DIDs of the entity
+          type: array
+          items:
+            type: string
+        vatNumber:
+          type: string
+          example: 12345678A
+          description: The VAT number of the entity
+      required:
+        - id
+        - name
+        - dids
+        - vatNumber
+    Openid4vpRequestDto:
+      type: object
+      properties:
+        scope:
+          type: string
+          example: EmailCredential
+          description: >-
+            The scope that defines the type of presentation to perform. Each
+            scope will be associated with a Presentation Definition that will
+            define the constrains of the presentation.
+        verificationRequestId:
+          type: string
+          example: 654c0286-1375-4ace-bd64-cf07ab741683
+          description: An identifier of the Presentation Request.
+        callbackUrl:
+          type: string
+          example: https://reqres.in/api/users?page=2
+          description: >-
+            The callback URL where the credentials presented by the user will be
+            sent if the presentation is successful. The call to the callback URL
+            will a POST request including an array of the credentials presented
+            by the user.
+      required:
+        - scope
+        - verificationRequestId
+        - callbackUrl
+    CredentialOfferAuthorizeRequestDto:
+      type: object
+      properties:
+        issuanceId:
+          type: string
+          example: 654c0286-1375-4ace-bd64-cf07ab741683
+          description: An identifier of the Credential Request.
+        credentialTypeId:
+          type: string
+          example: 44c991b0-b30e-4537-a34c-c96de30193a3
+          description: >-
+            Credential type ID of the type of credential that is requested to be
+            issued.
+        credentialSubject:
+          type: object
+          example:
+            email: test@test.com
+          description: >-
+            The content of the credentialSubject. This payload must comply with
+            the same data structure of the credentialType of the credential that
+            is being issued. Note that if there's an id field in the
+            credentialSubject, this id has to be the did of the subject of the
+            credential, following the W3C standard.
+        issuerDid:
+          type: string
+          example: >-
+            did:key:z2dmzD81cgPx8Vki7JbuuMmFYrWPgYoytykUZ3eyqht1j9KbshgsdLPCdgj5UXc4fzK5rJmYxPNXhqvZwsgs8uvF16KmCogWtd8UFCNHX7SnMkhESj7xXjTk8Ah5t72FxZgvXiYdxXuJ3NJeHBp2hx2iFxZPbeWf3sxopzMBJt6yFL8PuN
+          description: >-
+            If the entity has multiple Dids, the integrator can specify which
+            Did the credential wil be issued with.
+        notificationUrl:
+          type: string
+          example: https://example.net/callback
+          description: >-
+            The integrator can optionally provide a notification callback URL to receive feedback from the API when the holder successfully receive the credential to the wallet. The notificationUrl will receive a POST request containing an object that indicates whether the process was successful.
+      required:
+        - issuanceId
+        - credentialTypeId
+        - credentialSubject
+    CredentialOfferAuthorizeResponseDto:
+      type: object
+      properties:
+        qrBase64:
+          type: string
+          description: Base64 QR code with the issuance request for cross device flow.
+        rawCredentialOffer:
+          type: string
+          description: >-
+            Raw issuance request for same device flow.
+    CredentialOfferPreAuthRequestDto:
+      type: object
+      properties:
+        issuanceId:
+          type: string
+          example: 654c0286-1375-4ace-bd64-cf07ab741683
+          description: An identifier of the Credential Request.
+        credentialTypeId:
+          type: string
+          example: 44c991b0-b30e-4537-a34c-c96de30193a3
+          description: >-
+            Credential type ID of the type of credential that is requested to be
+            issued.
+        credentialSubject:
+          type: object
+          example:
+            email: test@test.com
+          description: >-
+            The content of the credentialSubject. This payload must comply with
+            the same data structure of the credentialType of the credential that
+            is being issued. Note that if there's an id field in the
+            credentialSubject, this id has to be the did of the subject of the
+            credential, following the W3C standard.
+        issuerDid:
+          type: string
+          example: >-
+            did:key:z2dmzD81cgPx8Vki7JbuuMmFYrWPgYoytykUZ3eyqht1j9KbshgsdLPCdgj5UXc4fzK5rJmYxPNXhqvZwsgs8uvF16KmCogWtd8UFCNHX7SnMkhESj7xXjTk8Ah5t72FxZgvXiYdxXuJ3NJeHBp2hx2iFxZPbeWf3sxopzMBJt6yFL8PuN
+          description: >-
+            If the entity has multiple Dids, the integrator can specify which
+            Did the credential wil be issued with.
+        userPin:
+          type: number
+          example: 4605
+          description: The user is issued a PIN over the counter, which serves as a security mechanism. The PIN must be a numeric value ranging from 0 to 99999999.
+        notificationUrl:
+          type: string
+          example: https://example.net/callback
+          description: >-
+            The integrator can optionally provide a notification callback URL to receive feedback from the API when the holder successfully receives the credential to the wallet. The notificationUrl will receive a POST request containing an object that indicates whether the process was successful.
+      required:
+        - issuanceId
+        - credentialTypeId
+        - credentialSubject
+    CredentialOfferPreAuthResponseDto:
+      type: object
+      properties:
+        qrBase64:
+          type: string
+          description: Base64 QR code with the issuance request for cross device flow.
+        rawCredentialOffer:
+          type: string
+          description: >-
+            Raw issuance request for same device flow.
+    Openid4vpResponseDto:
+      type: object
+      properties:
+        qrBase64:
+          type: string
+          description: Base64 QR code with the presentation request for cross device flow.
+        rawOpenid4vp:
+          type: string
+          description: >-
+            Raw presentation request for same device flow.

@@ -1,0 +1,112 @@
+name: Build and Deploy
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+  pull-requests: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18.17.1'
+          cache: 'yarn'
+
+      - name: Install Dependencies 📦
+        run: |
+          yarn install --immutable
+          yarn manypkg check
+
+      - name: Build Packages 🔨
+        run: yarn build:packages
+
+      - name: Build Website 🔨
+        run: yarn build:website
+        env:
+          DEPLOY_PRIME_URL: https://rohit-gohri.github.io/
+          DEPLOY_BASE_URL: /redocusaurus/
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: website/build
+        if: ${{ github.event_name == 'push' }}
+
+  deploy-pages:
+    if: ${{ github.event_name == 'push' }}
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build-and-deploy
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  publish-test:
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'push' && github.head_ref != 'changeset-release/main' }}
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18.17.1'
+          cache: 'yarn'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install Dependencies 📦
+        run: yarn install --immutable
+
+      - name: Build Packages 🔨
+        run: yarn build:packages
+
+      - name: Generate snapshot versions
+        run: yarn changeset version --snapshot test
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get version
+        run: |
+          yarn workspace redocusaurus exec "sh $PWD/scripts/version.sh" >> $GITHUB_ENV
+
+      - name: Publish
+        run: yarn changeset publish --tag test
+        if: ${{ env.publish == 'yes' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Add comment
+        if: ${{ env.publish == 'yes' }}
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          message: |
+            This pull request is automatically built and it is testable by installing [redocusaurus@v${{ env.package_version }}](https://www.npmjs.com/package/redocusaurus/v/${{ env.package_version }}).
+
+
+            For commit [${{ github.sha }}](https://github.com/rohit-gohri/redocusaurus/commit/${{ github.sha }}).
+          comment_tag: 'automatically-publish'
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
